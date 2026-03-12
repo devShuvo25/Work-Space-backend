@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// --- CORE USER & AUTH ---
+model User {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String         @unique
+  password        String
+  role            UserRole       @default(FREELANCER)
+  status          UserStatus     @default(ACTIVE)
+  
+  // Verification
+  isEmailVerified Boolean        @default(false)
+  image           String?        // Profile picture URL
+  address        String?  
+  
+  // Relations
+  profile         Profile?       // Professional details
+  jobs            Job[]        // Jobs posted (if Client)
+  proposals       Proposal[]     // Proposals submitted (if Freelancer)
+  messagesSent     Message[]     @relation("SentMessages")
+  messagesReceived Message[]     @relation("ReceivedMessages")
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("users")
+}
+
+// --- PROFESSIONAL PROFILE ---
+model Profile {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @unique @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  headline     String?  
+  bio          String?
+  skills       String[] 
+  category     String?  
+  
+  // Freelancer Stats
+  rating       Float    @default(0.0)
+  reviewsCount Int      @default(0)
+  earnings     Float    @default(0.0)
+  successRate  Int      @default(100)
+  
+  // New Fields
+  languages      String[]  // Changed to array for better flexibility
+  hourlyRate     Float?
+  country        String? 
+  availability   Boolean   @default(true)
+
+  // Social & Linked Accounts
+  linkedAccounts Json?     // Store { github: string, linkedin: string, etc. }
+
+  // Relations (One-to-Many)
+  portfolios     Portfolio[]
+  education      Education[]
+  experience     Experience[]
+  certifications Certification[]
+  testimonials   Testimonial[]
+
+  @@map("profiles")
+}
+
+// Support Models for Complex Data
+
+model Portfolio {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId   String   @db.ObjectId
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title       String
+  startingDate DateTime?
+  endDate     DateTime?
+  description String?
+  link        String?
+  imageUrl    String?
+}
+
+model Education {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId   String   @db.ObjectId
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  institution String
+  degree      String
+  fieldOfStudy String?
+  startDate   DateTime
+  endDate     DateTime?
+}
+
+model Experience {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId   String   @db.ObjectId
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  company     String
+  position    String
+  startDate   DateTime
+  endDate     DateTime?
+  description String?
+}
+
+model Certification {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId   String   @db.ObjectId
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name        String
+  issuingOrg  String
+  issueDate   DateTime?
+  credentialId String?
+  media String?
+}
+
+model Testimonial {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId   String   @db.ObjectId
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  clientName  String
+  clientRole  String?
+  content     String
+}
+
+// --- MARKETPLACE LOGIC ---
+model Job {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  budget       Float
+  budgetType   BudgetType  @default(FIXED) // FIXED or HOURLY
+  category     String
+  skillsRequired String[]
+  experienceLevel   ExperienceLevel
+  status       JobStatus   @default(OPEN)
+  
+  clientId     String      @db.ObjectId
+  client       User        @relation(fields: [clientId], references: [id])
+  proposals    Proposal[]
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("jobs")
+}
+
+model Proposal {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  coverLetter  String
+  bidAmount    Float
+  deliveryTime String         // e.g. "3 days"
+  status       ProposalStatus @default(PENDING)
+  
+  jobId        String         @db.ObjectId
+  job          Job            @relation(fields: [jobId], references: [id])
+  
+  freelancerId String         @db.ObjectId
+  freelancer   User           @relation(fields: [freelancerId], references: [id])
+
+  createdAt    DateTime       @default(now())
+
+  @@map("proposals")
+}
+
+model Message {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  content     String
+  senderId    String   @db.ObjectId
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId  String   @db.ObjectId
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  isRead      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+
+  @@map("messages")
+}
+
+// --- ENUMS ---
+enum UserRole {
+  CLIENT
+  FREELANCER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum BudgetType {
+  FIXED
+  HOURLY
+}
+
+enum JobStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ProposalStatus {
+  PENDING
+  REVIEWED
+  HIRED
+  REJECTED
+}
+
+enum ExperienceLevel {
+  ENTRY_LEVEL   // 0-2 years, learning the ropes
+  INTERMEDIATE  // 2-5 years, solid portfolio, independent
+  EXPERT        // 5+ years, deep technical mastery, leadership
+}
