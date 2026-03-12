@@ -7,3 +7,4 @@ generate-module.ts
 
 # Build
 dist
+.env*.local

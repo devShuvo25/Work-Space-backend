@@ -1,4 +1,4 @@
-import { UserRoleEnum, UserStatus } from "@prisma/client";
+import {  UserRole, UserStatus } from "@prisma/client";
 
 // user.types.ts
 export type IUpdateUser = {
@@ -6,7 +6,7 @@ export type IUpdateUser = {
   lastName?: string;
   email?: string;
   password?: string;
-  role?: UserRoleEnum;
+  role?: UserRole;
   status?: UserStatus;
 };
 
