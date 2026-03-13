@@ -9,7 +9,11 @@ const app: Application = express();
 // added production url
 app.use(
   cors({
-    origin: ['http://localhost:3001', 'http://localhost:3000',"https://work-space-backend-production-005e.up.railway.app"],
+    origin: [
+  "http://localhost:3001",
+  "http://localhost:3000",
+  "https://work-space-backend-production-005e.up.railway.app"
+],
     credentials: true,
   }),
 );
