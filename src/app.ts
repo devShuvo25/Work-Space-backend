@@ -8,7 +8,7 @@ import path from 'path';
 const app: Application = express();
 app.use(
   cors({
-    origin: ['http://localhost:3001', 'http://localhost:3000'],
+    origin: ['http://localhost:3001', 'http://localhost:3000',"https://work-space-backend-production-005e.up.railway.app"],
     credentials: true,
   }),
 );
