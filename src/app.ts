@@ -27,6 +27,7 @@ app.use('/api/v1', router);
 app.use(globalErrorHandler);
 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(httpStatus.NOT_FOUND).json({

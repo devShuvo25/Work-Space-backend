@@ -102,6 +102,7 @@ model Experience {
   company     String
   position    String
   startDate   DateTime
+  isCurrent   Boolean
   endDate     DateTime?
   description String?
 }
@@ -115,12 +116,14 @@ model Certification {
   issueDate   DateTime?
   credentialId String?
   media String?
+  image String?
 }
 
 model Testimonial {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   profileId   String   @db.ObjectId
   profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  projectTitle String
   clientName  String
   clientRole  String?
   content     String

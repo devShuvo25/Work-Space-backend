@@ -5,6 +5,7 @@ import { AuthRoutes } from '../modules/auth/auth.routes';
 import { upload } from '../middlewares/upload';
 
 import { UserRoutes } from '../modules/user/user.routes';
+import { ProfileRoutes } from '../modules/profile/profile.route';
 
 
 const router: Router = express.Router();
@@ -23,6 +24,10 @@ const moduleRoutes: ModuleRoute[] = [
     path: '/users',
     route: UserRoutes,
   },
+  {
+    path : "/profile",
+    route : ProfileRoutes
+  }
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
