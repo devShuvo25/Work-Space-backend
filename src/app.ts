@@ -7,16 +7,36 @@ import path from 'path';
 
 const app: Application = express();
 // added production url
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://work-space-zeta.vercel.app"
+];
+
 app.use(
   cors({
-    origin: [
-  "http://localhost:3001",
-  "http://localhost:3000",
-  "https://work-space-backend-production-005e.up.railway.app"
-],
+    origin: function (origin, callback) {
+      // allow requests with no origin (Postman, mobile apps, curl)
+      if (!origin) return callback(null, true);
+
+      // allow localhost and defined origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // allow ALL vercel preview deployments
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-  }),
+  })
 );
+
+// important for preflight requests
+app.options("*", cors());
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
