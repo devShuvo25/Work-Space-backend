@@ -3,46 +3,45 @@ import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import prisma from '../../utils/prisma';
 import { IUpdateUser } from './user.interface';
-import { UserRole, UserStatus } from '@prisma/client';
+import { Prisma, UserRole, UserStatus } from '@prisma/client';
 
 /**
  * Get All Users: Supports pagination and returns a meta object.
  * Standardizes the "name" field for your marketplace.
  */
-const getAllUsersFromDB = async (query: Record<string, any>) => {
-  const page = Number(query?.page) || 1;
-  const limit = Number(query?.limit) || 10;
-  const skip = (page - 1) * limit;
+const getAllUsersFromDB = async (searchTerm: string, currentUserId?: string) => {
+  const andConditions: any[] = [];
 
-  const [users, total] = await prisma.$transaction([
-    prisma.user.findMany({
-      skip,
-      take: limit,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        image: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.user.count(),
-  ]);
+  if (searchTerm) {
+    andConditions.push({
+      OR: [
+        // এখানে সরাসরি 'searchTerm' (string) দিতে হবে, অবজেক্ট নয়
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { email: { contains: searchTerm, mode: 'insensitive' } },
+      ],
+    });
+  }
 
-  return {
-    data: users,
-    meta: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
+  if (currentUserId) {
+    andConditions.push({
+      id: { not: currentUserId },
+    });
+  }
+
+  const result = await prisma.user.findMany({
+    where: {
+      AND: andConditions,
     },
-  };
-};
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+    take: 10,
+  });
 
+  return result;
+};
 /**
  * Get User By ID: Includes the nested professional profile.
  */

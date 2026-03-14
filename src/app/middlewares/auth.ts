@@ -20,7 +20,6 @@ const auth = (...roles: string[]) => {
 
       // Bearer TOKEN
       const token = authorization.split(' ')[1] || authorization;
-      console.log(token);
 
       if (!token) {
         throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');

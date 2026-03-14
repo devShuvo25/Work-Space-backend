@@ -7,16 +7,23 @@ import { UserServices } from './user.service';
 /**
  * Get All Users (Admin view with pagination)
  */
-const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.getAllUsersFromDB(req.query);
+const getAllUsers = catchAsync(async (req, res) => {
+    // req.query থেকে searchTerm স্ট্রিং হিসেবে বের করে নিন
+    const { searchTerm } = req.query; 
+    const currentUserId = req.user.id;
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Users retrieved successfully',
-    data: result.data,
-    meta: result.meta,
-  });
+    // Service-এ পাঠানোর সময় নিশ্চিত করুন আপনি শুধু string পাঠাচ্ছেন
+    const result = await UserServices.getAllUsersFromDB(
+        searchTerm as string, 
+        currentUserId
+    );
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Users retrieved successfully',
+        data: result,
+    });
 });
 
 /**

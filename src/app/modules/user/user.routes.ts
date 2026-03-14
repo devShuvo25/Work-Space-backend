@@ -9,7 +9,7 @@ import { upload } from '../../../config/upload.config';
 // Assume you have auth middleware for roles, e.g., auth('SUPERADMIN', 'ADMIN')
 const router = express.Router();
 
-router.get('/',auth(UserRole.ADMIN), UserController.getAllUsers); // Add auth('SUPERADMIN')
+router.get('/',auth(UserRole.ADMIN, UserRole.FREELANCER,UserRole.CLIENT), UserController.getAllUsers); // Add auth('SUPERADMIN')
 
 // Change .get to .patch
 router.patch(

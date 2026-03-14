@@ -19,17 +19,21 @@ model User {
   // Verification
   isEmailVerified Boolean        @default(false)
   image           String?        // Profile picture URL
-  address        String?  
+  address         String?  
   
   // Relations
-  profile         Profile?       // Professional details
-  jobs            Job[]        // Jobs posted (if Client)
-  proposals       Proposal[]     // Proposals submitted (if Freelancer)
-  messagesSent     Message[]     @relation("SentMessages")
-  messagesReceived Message[]     @relation("ReceivedMessages")
+  profile          Profile?       // Professional details
+  jobs             Job[]          // Jobs posted (if Client)
+  proposals        Proposal[]     // Proposals submitted (if Freelancer)
+
+// Messaging Relations
+  conversationIds  String[]       @db.ObjectId
+  conversations    Conversation[] @relation(fields: [conversationIds], references: [id])
   
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  messagesSent     Message[]      @relation("SentMessages")
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@map("users")
 }
@@ -52,13 +56,13 @@ model Profile {
   successRate  Int      @default(100)
   
   // New Fields
-  languages      String[]  // Changed to array for better flexibility
-  hourlyRate     Float?
-  country        String? 
-  availability   Boolean   @default(true)
+  languages    String[]  
+  hourlyRate   Float?
+  country      String? 
+  availability Boolean   @default(true)
 
   // Social & Linked Accounts
-  linkedAccounts Json?     // Store { github: string, linkedin: string, etc. }
+  linkedAccounts Json?     
 
   // Relations (One-to-Many)
   portfolios     Portfolio[]
@@ -73,80 +77,80 @@ model Profile {
 // Support Models for Complex Data
 
 model Portfolio {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  profileId   String   @db.ObjectId
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  title       String
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId    String   @db.ObjectId
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title        String
   startingDate DateTime?
-  endDate     DateTime?
-  description String?
-  link        String?
-  imageUrl    String?
+  endDate      DateTime?
+  description  String?
+  link         String?
+  imageUrl     String?
 }
 
 model Education {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  profileId   String   @db.ObjectId
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  institution String
-  degree      String
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId    String   @db.ObjectId
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  institution  String
+  degree       String
   fieldOfStudy String?
-  startDate   DateTime
-  endDate     DateTime?
+  startDate    DateTime
+  endDate      DateTime?
 }
 
 model Experience {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  profileId   String   @db.ObjectId
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  company     String
-  position    String
-  startDate   DateTime
-  isCurrent   Boolean
-  endDate     DateTime?
-  description String?
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId    String   @db.ObjectId
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  company      String
+  position     String
+  startDate    DateTime
+  isCurrent    Boolean
+  endDate      DateTime?
+  description  String?
 }
 
 model Certification {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  profileId   String   @db.ObjectId
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  name        String
-  issuingOrg  String
-  issueDate   DateTime?
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId    String   @db.ObjectId
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name         String
+  issuingOrg   String
+  issueDate    DateTime?
   credentialId String?
-  media String?
-  image String?
+  media        String?
+  image        String?
 }
 
 model Testimonial {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  profileId   String   @db.ObjectId
-  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  profileId    String   @db.ObjectId
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
   projectTitle String
-  clientName  String
-  clientRole  String?
-  content     String
+  clientName   String
+  clientRole   String?
+  content      String
 }
 
 // --- MARKETPLACE LOGIC ---
 model Job {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
-  title        String
-  description  String
-  budget       Float
-  budgetType   BudgetType  @default(FIXED) // FIXED or HOURLY
-  category     String
-  skillsRequired String[]
-  experienceLevel   ExperienceLevel
-  status       JobStatus   @default(OPEN)
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String
+  budget          Float
+  budgetType      BudgetType  @default(FIXED)
+  category        String
+  skillsRequired  String[]
+  experienceLevel ExperienceLevel
+  status          JobStatus   @default(OPEN)
   
-  clientId     String      @db.ObjectId
-  client       User        @relation(fields: [clientId], references: [id])
-  proposals    Proposal[]
+  clientId        String      @db.ObjectId
+  client          User        @relation(fields: [clientId], references: [id])
+  proposals       Proposal[]
   
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@map("jobs")
 }
@@ -155,7 +159,7 @@ model Proposal {
   id           String         @id @default(auto()) @map("_id") @db.ObjectId
   coverLetter  String
   bidAmount    Float
-  deliveryTime String         // e.g. "3 days"
+  deliveryTime String         
   status       ProposalStatus @default(PENDING)
   
   jobId        String         @db.ObjectId
@@ -169,16 +173,31 @@ model Proposal {
   @@map("proposals")
 }
 
-model Message {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  content     String
-  senderId    String   @db.ObjectId
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
-  receiverId  String   @db.ObjectId
-  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  isRead      Boolean  @default(false)
+model Conversation {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  participantIds String[]  @db.ObjectId
+  participants   User[]    @relation(fields: [participantIds], references: [id])
   
-  createdAt   DateTime @default(now())
+  messages       Message[]
+  lastMessage    String?
+  updatedAt      DateTime  @default(now())
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  content        String
+  
+  // senderId এবং sender রিলেশন
+  senderId       String       @db.ObjectId
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  
+  conversationId String       @db.ObjectId
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
 
   @@map("messages")
 }
@@ -216,7 +235,7 @@ enum ProposalStatus {
 }
 
 enum ExperienceLevel {
-  ENTRY_LEVEL   // 0-2 years, learning the ropes
-  INTERMEDIATE  // 2-5 years, solid portfolio, independent
-  EXPERT        // 5+ years, deep technical mastery, leadership
+  ENTRY_LEVEL  
+  INTERMEDIATE 
+  EXPERT       
 }
