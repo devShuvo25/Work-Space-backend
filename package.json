@@ -9,6 +9,7 @@
     "pm": "npx prisma migrate dev ",
     "pg": "npx prisma generate",
     "stdo": "npx prisma studio",
+    "seed" : "ts-node prisma/seed.ts",
     "generate-module": "ts-node generate-module.ts",
     "build": "tsc",
     "lint:check": "eslint --ignore-path .eslintignore --ext .js,.ts .",

@@ -7,6 +7,7 @@ import { upload } from '../middlewares/upload';
 import { UserRoutes } from '../modules/user/user.routes';
 import { ProfileRoutes } from '../modules/profile/profile.route';
 import { ChatRoutes } from '../modules/messages/message.route';
+import { JobRoutes } from '../modules/jobs/jobs.routes';
 
 
 const router: Router = express.Router();
@@ -28,6 +29,10 @@ const moduleRoutes: ModuleRoute[] = [
   {
     path : "/profile",
     route : ProfileRoutes
+  },
+  {
+    path : '/jobs',
+    route : JobRoutes
   },
   {
     path : "/chats",
