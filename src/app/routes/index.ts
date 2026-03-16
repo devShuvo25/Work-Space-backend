@@ -8,6 +8,7 @@ import { UserRoutes } from '../modules/user/user.routes';
 import { ProfileRoutes } from '../modules/profile/profile.route';
 import { ChatRoutes } from '../modules/messages/message.route';
 import { JobRoutes } from '../modules/jobs/jobs.routes';
+import { ProposalRoutes } from '../modules/proposals/proposals.routes';
 
 
 const router: Router = express.Router();
@@ -33,6 +34,10 @@ const moduleRoutes: ModuleRoute[] = [
   {
     path : '/jobs',
     route : JobRoutes
+  },
+  {
+    path : "/proposals",
+    route : ProposalRoutes
   },
   {
     path : "/chats",
