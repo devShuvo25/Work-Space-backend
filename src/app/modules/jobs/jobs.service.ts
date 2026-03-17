@@ -112,10 +112,32 @@ if (category) {
 const getJobById = async (id: string): Promise<Job | null> => {
   return await prisma.job.findUnique({
     where: { id },
+    // include: {
+    //   client: { select: { id: true, name: true, email: true, image: true,
+    //     createdAt:true, profile: true } },
+    //   proposals: { include: { freelancer: { select: { id: true, name: true, image: true } } } },
+    // },
     include: {
-      client: { select: { id: true, name: true, email: true, image: true, profile: true } },
-      proposals: { include: { freelancer: { select: { id: true, name: true, image: true } } } },
-    },
+  client: { 
+    select: { 
+      id: true, 
+      name: true, 
+      email: true, 
+      image: true,
+      createdAt: true, 
+      profile: true 
+    } 
+  },
+  proposals: { 
+    include: { 
+      freelancer: { 
+        include: { 
+          profile: true // This gets the full Bio, Skills, Rating, etc.
+        } 
+      } 
+    } 
+  },
+},
   });
 };
 
