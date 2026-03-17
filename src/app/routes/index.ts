@@ -9,6 +9,7 @@ import { ProfileRoutes } from '../modules/profile/profile.route';
 import { ChatRoutes } from '../modules/messages/message.route';
 import { JobRoutes } from '../modules/jobs/jobs.routes';
 import { ProposalRoutes } from '../modules/proposals/proposals.routes';
+import { AIRoutes } from '../modules/AI_assistant/ai.routes';
 
 
 const router: Router = express.Router();
@@ -42,6 +43,10 @@ const moduleRoutes: ModuleRoute[] = [
   {
     path : "/chats",
     route : ChatRoutes
+  },
+  {
+    path : '/ai',
+    route: AIRoutes
   }
 ];
 
